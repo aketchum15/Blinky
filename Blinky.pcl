@@ -1,0 +1,272 @@
+###########################UNWRAPPING##############################
+
+int first_list = int(first_list_wrapper.caption());
+int num_blocks = int(num_blocks_wrapper.caption());
+int num_trials = int(num_trials_wrapper.caption());
+int max_post_response_delay = int(max_post_response_delay_wrapper.caption());
+int min_post_response_delay = int(min_post_response_delay_wrapper.caption());
+
+###########################PCL VARS################################
+
+array<trial> block1[0];
+array<trial> block2[0];
+
+int curr_type;
+trial this_trial;
+bool needs_shuffle;
+
+array<double> port_codes[0];
+array<int> target_buttons[1];
+
+output_file log = new output_file;
+log.open("Blinky_log_" + date_time( "yyyy.mm.dd_hh.nn.ss" )+ ".csv");
+
+int stim_type;
+array<int> corrects[6][num_blocks];
+array<double> reaction[6][num_blocks][4];
+
+array<string> stim_types[6] = {"Color", "Shape", "Motion", "Shape and Motion", "Color and Motion", "Color and Shape"};
+
+###########################SUB ROUTINES#############################
+
+sub string type_to_string(int aType) begin
+	if aType == stimulus_hit then
+		return "HIT";
+	elseif aType == stimulus_incorrect then
+		return "INCORRECT";
+	else
+		return "MISS";
+	end;
+return "";
+end;
+
+sub input_data(int index, int block, stimulus_data data) begin
+	
+	if (data.type() == stimulus_hit) then
+		corrects[index][block] = corrects[index][block] + 1;
+	end;
+	
+	loop int i = 1 until i > 6 begin
+		if (reaction[index][block][i] == 0.0) then
+			reaction[index][block][i] = data.reaction_time_double();
+			break;
+		end;
+		i = i + 1;
+	end;
+	term.print_line(reaction);
+	term.print_line(corrects);
+end;
+
+sub write_log begin
+
+	log.print("Stimulus type,Percent Correct,Average Reaction\n");
+	log.print("Block Data\n");
+	double r_avg;
+	double correct;
+	
+	loop int i = 1 until i > num_blocks begin
+		log.print("\nBlock " + string(i) + "\n");
+		loop int j = 1 until j > 6 begin 
+			r_avg = 0;
+			loop int k = 1 until k > 4 begin
+				r_avg = r_avg + reaction[j][i][k];
+				k = k + 1;
+			end;
+			r_avg = r_avg / 4;
+			log.print(stim_types[j] + "," + string(double(corrects[j][i])/4) + "," + string(r_avg) + "\n");
+			j = j + 1;
+		end;
+		i = i + 1;
+	end;
+	
+	log.print("\nTotals\n");
+	
+	loop int i = 1 until i > 6 begin
+		correct = 0;
+		r_avg = 0;
+		loop int j = 1 until j > num_blocks begin
+			correct = correct + corrects[i][j];
+			loop int k = 1 until k > 4 begin
+				r_avg = r_avg + reaction[i][j][k];
+				k = k + 1;
+			end;
+			j = j + 1;
+		end;
+		log.print(stim_types[i] + "," + string(correct / (4 * num_blocks)) + "," + string(r_avg / (4 * num_blocks)) + "\n");
+		i = i + 1;
+	end;
+	
+end;
+
+
+sub fill_array(int first) begin 
+	if (first == 1) then
+		block1.add(Psh_Bsh_111_115);
+		block1.add(pSV_pCH_212_213);
+		block1.add(pCH_pSV_213_212);
+		block1.add(Pcv_Bcv_114_118);
+		block1.add(bSH_bCV_215_218);
+		block1.add(Bsv_Psv_116_112);
+		block1.add(Bch_Pch_117_113);
+		block1.add(bCV_bSH_218_215);
+		block1.add(PsH_BsV_221_226);
+		block1.add(pSv_pCv_122_124);
+		block1.add(pCh_pSh_123_121);
+		block1.add(PcV_BcH_224_227);
+		block1.add(bSh_bCh_125_127);
+		block1.add(BsV_PsH_226_221);
+		block1.add(BcH_PcV_227_224);
+		block1.add(bCv_bSv_128_126);
+		block1.add(psH_psV_131_132);
+		block1.add(PSv_BCv_232_238);
+		block1.add(pcH_pcV_133_134);
+		block1.add(PCv_BSv_234_236);
+		block1.add(BSh_PCh_235_233);
+		block1.add(bsV_bsH_136_135);
+		block1.add(BCh_PSh_237_231);
+
+		block2.add(pSH_pCV_211_214);
+		block2.add(Psv_Bsv_112_116);
+		block2.add(Pch_Bch_113_117);
+		block2.add(pCV_pSH_214_211);
+		block2.add(Bsh_Psh_115_111);
+		block2.add(bSV_bCH_216_217);
+		block2.add(bCH_bSV_217_216);
+		block2.add(Bcv_Pcv_118_114);
+		block2.add(pSh_pCh_121_123);
+		block2.add(PsV_BsH_222_225);
+		block2.add(PcH_BcV_223_228);
+		block2.add(pCv_pSv_124_122);
+		block2.add(BsH_PsV_225_222);
+		block2.add(bSv_bCv_126_128);
+		block2.add(bCh_bSh_127_125);
+		block2.add(BcV_PcH_228_223);
+		block2.add(PSh_BCh_231_237);
+		block2.add(psV_psH_132_131);
+		block2.add(PCh_BSh_233_235);
+		block2.add(pcV_pcH_134_133);
+		block2.add(bsH_bsV_135_136);
+		block2.add(BSv_PCv_236_234);
+		block2.add(bcH_bcV_137_138);
+		block2.add(BCv_PSv_238_232);
+	elseif first == 2 then
+
+		block1.add(pSH_pCV_211_214);
+		block1.add(Psv_Bsv_112_116);
+		block1.add(Pch_Bch_113_117);
+		block1.add(pCV_pSH_214_211);
+		block1.add(Bsh_Psh_115_111);
+		block1.add(bSV_bCH_216_217);
+		block1.add(bCH_bSV_217_216);
+		block1.add(Bcv_Pcv_118_114);
+		block1.add(pSh_pCh_121_123);
+		block1.add(PsV_BsH_222_225);
+		block1.add(PcH_BcV_223_228);
+		block1.add(pCv_pSv_124_122);
+		block1.add(BsH_PsV_225_222);
+		block1.add(bSv_bCv_126_128);
+		block1.add(bCh_bSh_127_125);
+		block1.add(BcV_PcH_228_223);
+		block1.add(PSh_BCh_231_237);
+		block1.add(psV_psH_132_131);
+		block1.add(PCh_BSh_233_235);
+		block1.add(pcV_pcH_134_133);
+		block1.add(bsH_bsV_135_136);
+		block1.add(BSv_PCv_236_234);
+		block1.add(bcH_bcV_137_138);
+		block1.add(BCv_PSv_238_232);
+
+		block2.add(Psh_Bsh_111_115);
+		block2.add(pSV_pCH_212_213);
+		block2.add(pCH_pSV_213_212);
+		block2.add(Pcv_Bcv_114_118);
+		block2.add(bSH_bCV_215_218);
+		block2.add(Bsv_Psv_116_112);
+		block2.add(Bch_Pch_117_113);
+		block2.add(bCV_bSH_218_215);
+		block2.add(PsH_BsV_221_226);
+		block2.add(pSv_pCv_122_124);
+		block2.add(pCh_pSh_123_121);
+		block2.add(PcV_BcH_224_227);
+		block2.add(bSh_bCh_125_127);
+		block2.add(BsV_PsH_226_221);
+		block2.add(BcH_PcV_227_224);
+		block2.add(bCv_bSv_128_126);
+		block2.add(psH_psV_131_132);
+		block2.add(PSv_BCv_232_238);
+		block2.add(pcH_pcV_133_134);
+		block2.add(PCv_BSv_234_236);
+		block2.add(BSh_PCh_235_233);
+		block2.add(bsV_bsH_136_135);
+		block2.add(BCh_PSh_237_231);
+	end;
+end;
+
+###################################################################################
+
+fill_array(first_list);
+
+
+loop int i = 1 until i > num_blocks/2 begin
+	
+	block1.shuffle();
+	block2.shuffle();
+	term.print_line("Shuffled");
+	set_trial.present();
+
+	loop int j = 1 until j > block1.count() begin
+		this_trial = block1[j];
+
+		this_trial.set_start_delay(random(min_post_response_delay, max_post_response_delay));
+
+		this_trial.get_stimulus_event(1).get_port_codes(port_codes);
+		target_buttons[1] = int((port_codes[1]) / 100);
+		curr_type = (i * 2) + (target_buttons[1] - 2);
+		term.print_line("trial: " + this_trial.description());
+				
+		this_trial.present();
+
+		response_trial.get_stimulus_event(1).set_target_button(target_buttons);		
+		response_trial.present();
+		
+		#stim_type is used to map the different types of stimuli (color, motion, etc) to sequential values (1, 2, etc) using the port code
+		stim_type = (int(port_codes[1] / 100)*3 + int(port_codes[1] / 10) % 10) - 3;
+		input_data(stim_type, i*2 -1, stimulus_manager.last_stimulus_data());
+
+		j = j+1;
+	end;
+	
+	break_trial.present();
+	ready_trial.present();
+	set_trial.present();
+
+	loop int j = 1 until j > block2.count() begin
+		
+		this_trial = block2[j];
+
+		this_trial.set_start_delay(random(min_post_response_delay, max_post_response_delay));
+
+		this_trial.get_stimulus_event(1).get_port_codes(port_codes);
+		target_buttons[1] = int((port_codes[1]) / 100);
+		curr_type = (i * 2) + (target_buttons[1] - 2);
+		term.print_line("trial: " + this_trial.description());
+		
+		this_trial.present();
+
+		response_trial.get_stimulus_event(1).set_target_button(target_buttons);
+		response_trial.present();
+		
+		stim_type = (int(port_codes[1] / 100)*3 + int(port_codes[1] / 10) % 10) - 3;
+		input_data(stim_type, i*2, stimulus_manager.last_stimulus_data());
+
+		j = j+1;
+	end;
+
+	if (i != num_blocks/2) then
+		break_trial.present();
+		ready_trial.present();
+	end;
+	i = i + 1;
+end;
+write_log();
+done_trial.present();

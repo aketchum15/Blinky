@@ -1,9 +1,11 @@
 scenario = "blinky";
+no_logfile = true;
 write_codes = true;
 active_buttons = 3;
 button_codes = 1, 2, 3;
 response_matching = simple_matching;
 default_clear_active_stimuli = true;
+pcl_file = "Blinky.pcl";
 
 #determines which list comes fist, when 1 experiment will alternate list 1, list 2, etc, when 2 will alternate list 2, list 1, etc.
 $first_list = 2;
@@ -12,16 +14,16 @@ $first_list = 2;
 $width_height = 540;
 
 #how long after the stimuli before the response trial shows
-$delay_before_response = 500;
+$delay_before_response = 5;
 
 #duration of the response trial
-$response_window = 2000;
+$response_window = 1000;
 
 #max duration of blank screen after response window
-$max_post_response_delay = 1500;
+$max_post_response_delay = 100;
 
 #min duration of blank screen after response window
-$min_post_response_delay = 500;
+$min_post_response_delay = 100;
 
 #number of blocks per session, should be even
 $num_blocks = 2;
@@ -967,9 +969,9 @@ trial {
 				font = "Times New Roman";
 				font_size = 36;
 			};
-			x = 0; y = 0;
+			x = 0;
+			y = 0;
 		};
-		code = "response trial starts";
 		port_code = 31;
 	};
 	
@@ -1041,329 +1043,3 @@ trial {
 	};
 } done_trial;
 
-begin_pcl;
-
-###########################UNWRAPPING##############################
-
-int first_list = int(first_list_wrapper.caption());
-int num_blocks = int(num_blocks_wrapper.caption());
-int num_trials = int(num_trials_wrapper.caption());
-int max_post_response_delay = int(max_post_response_delay_wrapper.caption());
-int min_post_response_delay = int(min_post_response_delay_wrapper.caption());
-
-###########################PCL VARS################################
-
-#array<int> trial_order[0];
-
-array<trial> block1[0];
-array<trial> block2[0];
-
-#TRIAL_DATA FORMATTING
-#[SINGLE CHANGE BLOCK 1 [HIT, INCORRECT, MISS],
-#DOUBLE CHANGE BLOCK 1 [HIT, INCORRECT, MISS],
-#SINGLE CHANGE BLOCK 2 [HIT, INCORRECT, MISS],
-#DOUBLE CHANGE BLOCK 2 [HIT, INCORREECT, MISS],
-#ETC... ]
-array<int> trial_data[num_blocks*2][3];
-
-array<double> reaction_data[num_blocks*2][0];
-
-int curr_type;
-trial this_trial;
-bool needs_shuffle;
-
-output_file log_file = new output_file;
-
-array<double> port_codes[0];
-array<int> target_buttons[1];
-
-
-###########################SUB ROUTINES#############################
-
-sub string type_to_string(int aType) begin
-	if aType == stimulus_hit then
-		return "HIT";
-	elseif aType == stimulus_incorrect then
-		return "INCORRECT";
-	else
-		return "MISS";
-	end;
-return "";
-end;
-
-sub process_data(trial curr_trial, stimulus_data data, int index, int trial_num) begin
-	
-	int data_type = data.type();
-	reaction_data[index].add(data.reaction_time_double());
-	term.print_line("ADDED");
-	term.print_line(reaction_data[index]);
-	
-	if data_type == stimulus_hit then 
-		trial_data[index][1] = trial_data[index][1] + 1;
-	elseif data_type == stimulus_incorrect then
-		trial_data[index][2] = trial_data[index][2] + 1;
-	elseif data_type == stimulus_miss then
-		trial_data[index][3] = trial_data[index][3] + 1;	
-	end;
-	
-	log_file.print(string(trial_num) + ","
-						+ "\"" + curr_trial.description() + "\"" +  ","
-						+ string(data.button()) + ","
-						+ type_to_string(data_type) + ","
-						+ string(data.reaction_time_double()) + "\n");
-end;
-
-sub fill_array(int first) begin 
-	term.print_line(first);
-	if (first == 1) then
-		block1.add(Psh_Bsh_111_115);
-		block1.add(pSV_pCH_212_213);
-		block1.add(pCH_pSV_213_212);
-		block1.add(Pcv_Bcv_114_118);
-		block1.add(bSH_bCV_215_218);
-		block1.add(Bsv_Psv_116_112);
-		block1.add(Bch_Pch_117_113);
-		block1.add(bCV_bSH_218_215);
-		block1.add(PsH_BsV_221_226);
-		block1.add(pSv_pCv_122_124);
-		block1.add(pCh_pSh_123_121);
-		block1.add(PcV_BcH_224_227);
-		block1.add(bSh_bCh_125_127);
-		block1.add(BsV_PsH_226_221);
-		block1.add(BcH_PcV_227_224);
-		block1.add(bCv_bSv_128_126);
-		block1.add(psH_psV_131_132);
-		block1.add(PSv_BCv_232_238);
-		block1.add(pcH_pcV_133_134);
-		block1.add(PCv_BSv_234_236);
-		block1.add(BSh_PCh_235_233);
-		block1.add(bsV_bsH_136_135);
-		block1.add(BCh_PSh_237_231);
-
-		block2.add(pSH_pCV_211_214);
-		block2.add(Psv_Bsv_112_116);
-		block2.add(Pch_Bch_113_117);
-		block2.add(pCV_pSH_214_211);
-		block2.add(Bsh_Psh_115_111);
-		block2.add(bSV_bCH_216_217);
-		block2.add(bCH_bSV_217_216);
-		block2.add(Bcv_Pcv_118_114);
-		block2.add(pSh_pCh_121_123);
-		block2.add(PsV_BsH_222_225);
-		block2.add(PcH_BcV_223_228);
-		block2.add(pCv_pSv_124_122);
-		block2.add(BsH_PsV_225_222);
-		block2.add(bSv_bCv_126_128);
-		block2.add(bCh_bSh_127_125);
-		block2.add(BcV_PcH_228_223);
-		block2.add(PSh_BCh_231_237);
-		block2.add(psV_psH_132_131);
-		block2.add(PCh_BSh_233_235);
-		block2.add(pcV_pcH_134_133);
-		block2.add(bsH_bsV_135_136);
-		block2.add(BSv_PCv_236_234);
-		block2.add(bcH_bcV_137_138);
-		block2.add(BCv_PSv_238_232);
-	elseif first == 2 then
-
-		block1.add(pSH_pCV_211_214);
-		block1.add(Psv_Bsv_112_116);
-		block1.add(Pch_Bch_113_117);
-		block1.add(pCV_pSH_214_211);
-		block1.add(Bsh_Psh_115_111);
-		block1.add(bSV_bCH_216_217);
-		block1.add(bCH_bSV_217_216);
-		block1.add(Bcv_Pcv_118_114);
-		block1.add(pSh_pCh_121_123);
-		block1.add(PsV_BsH_222_225);
-		block1.add(PcH_BcV_223_228);
-		block1.add(pCv_pSv_124_122);
-		block1.add(BsH_PsV_225_222);
-		block1.add(bSv_bCv_126_128);
-		block1.add(bCh_bSh_127_125);
-		block1.add(BcV_PcH_228_223);
-		block1.add(PSh_BCh_231_237);
-		block1.add(psV_psH_132_131);
-		block1.add(PCh_BSh_233_235);
-		block1.add(pcV_pcH_134_133);
-		block1.add(bsH_bsV_135_136);
-		block1.add(BSv_PCv_236_234);
-		block1.add(bcH_bcV_137_138);
-		block1.add(BCv_PSv_238_232);
-
-		block2.add(Psh_Bsh_111_115);
-		block2.add(pSV_pCH_212_213);
-		block2.add(pCH_pSV_213_212);
-		block2.add(Pcv_Bcv_114_118);
-		block2.add(bSH_bCV_215_218);
-		block2.add(Bsv_Psv_116_112);
-		block2.add(Bch_Pch_117_113);
-		block2.add(bCV_bSH_218_215);
-		block2.add(PsH_BsV_221_226);
-		block2.add(pSv_pCv_122_124);
-		block2.add(pCh_pSh_123_121);
-		block2.add(PcV_BcH_224_227);
-		block2.add(bSh_bCh_125_127);
-		block2.add(BsV_PsH_226_221);
-		block2.add(BcH_PcV_227_224);
-		block2.add(bCv_bSv_128_126);
-		block2.add(psH_psV_131_132);
-		block2.add(PSv_BCv_232_238);
-		block2.add(pcH_pcV_133_134);
-		block2.add(PCv_BSv_234_236);
-		block2.add(BSh_PCh_235_233);
-		block2.add(bsV_bsH_136_135);
-		block2.add(BCh_PSh_237_231);
-	end;
-end;
-
-sub block_output(int index) begin
-	
-	log_file.print("BLOCK DATA\n");
-	log_file.print("Single Change\n");
-	log_file.print("Percent Correct,Average Reaction Time\n");
-	
-	double percent_correct = double(trial_data[index][1])/double(num_trials/2);
-	double average_response = 0;
-	loop int i = 1 until i > num_trials/2 begin 
-		average_response = average_response + reaction_data[index][i];
-		i = i + 1;
-	end;
-	average_response = average_response / double(num_trials/2);
-	log_file.print(string(percent_correct) + "," + string(average_response) + "\n");
-	
-	log_file.print("Double Change\n");
-	log_file.print("Percent Correct,Average Reaction Time\n");
-
-	
-	percent_correct = double(trial_data[index+1][1])/double(num_trials/2);
-	average_response = 0;
-	
-	loop int i = 1 until i > num_trials/2 begin
-		average_response = average_response + reaction_data[index+1][i];
-		i = i + 1;
-	end;
-	average_response = average_response/double(num_trials/2);
-	log_file.print(string(percent_correct) + "," + string(average_response) + "\n");
-end;
-
-sub final_output begin 
-	double percent_correct = 0;
-	double average_reaction = 0;
-	
-	log_file.print("EXPERIMENT DATA\n");
-	log_file.print("Single Change\n");
-	log_file.print("Percent Correct,Average Reaction TIme\n");
-	
-	loop int i = 1 until i > num_blocks*2 begin
-		percent_correct = percent_correct + double(trial_data[i][1]);
-		i = i + 2;
-	end;
-	percent_correct = percent_correct / double(num_trials*num_blocks/2);
-	
-	loop int i = 1 until i > num_blocks*2 begin 
-		loop int j = 1 until j > num_trials/2 begin
-			average_reaction = average_reaction + reaction_data[i][j];
-			j = j + 1;
-		end;
-		i = i + 2;
-	end;
-	average_reaction = average_reaction / double(num_blocks*num_trials/2);
-	
-	log_file.print(string(percent_correct) + "," + string(average_reaction) + "\n");
-	
-	percent_correct = 0;
-	average_reaction = 0;
-	
-	log_file.print("Double Change\n");
-	log_file.print("Percent Correct,Average Reaction Time\n");
-	
-	loop int i = 2 until i > num_blocks*2 begin
-		percent_correct = percent_correct + double(trial_data[i][1]);
-		i = i + 2;
-	end;
-	percent_correct = percent_correct / double(num_trials*num_blocks/2);
-	
-	loop int i = 2 until i > num_blocks*2 begin 
-		loop int j = 1 until j > num_trials/2 begin
-			average_reaction = average_reaction + reaction_data[i][j];
-			j = j + 1;
-		end;
-		i = i + 2;
-	end;
-	average_reaction = average_reaction / double(num_blocks*num_trials/2);
-	
-	log_file.print(string(percent_correct) + "," + string(average_reaction) + "\n");
-end;
-
-###################################################################################
-
-fill_array(first_list);
-
-log_file.open("Log\ Files/blinky _detail_log" + date_time("yyyy.mm.dd_hh.nn.ss") + ".csv");
-log_file.print("Trial,Stimulus Name,Response,Response Type,Reaction Time\n");
-
-loop int i = 1 until i > num_blocks/2 begin
-	
-	block1.shuffle();
-	block2.shuffle();
-	term.print_line("Shuffled");
-	set_trial.present();
-
-	loop int j = 1 until j > block1.count() begin
-		this_trial = block1[j];
-
-		this_trial.set_start_delay(random(min_post_response_delay, max_post_response_delay));
-
-		this_trial.get_stimulus_event(1).get_port_codes(port_codes);
-		target_buttons[1] = int((port_codes[1]) / 100);
-		curr_type = (i * 2) + (target_buttons[1] - 2);
-		term.print_line("trial: " + this_trial.description());
-				
-		this_trial.present();
-
-		response_trial.get_stimulus_event(1).set_target_button(target_buttons);
-
-		response_trial.present();
-
-		process_data(this_trial, stimulus_manager.last_stimulus_data(), curr_type, j);
-
-		j = j+1;
-	end;
-	
-	break_trial.present();
-	term.print_line(trial_data);
-	block_output((i*2)-1);
-	ready_trial.present();
-	set_trial.present();
-
-	loop int j = 1 until j > block2.count() begin
-		
-		this_trial = block2[j];
-
-		this_trial.set_start_delay(random(min_post_response_delay, max_post_response_delay));
-
-		this_trial.get_stimulus_event(1).get_port_codes(port_codes);
-		target_buttons[1] = int((port_codes[1]) / 100);
-		curr_type = (i * 2) + (target_buttons[1] - 2);
-		term.print_line("trial: " + this_trial.description());
-		
-		this_trial.present();
-
-		response_trial.get_stimulus_event(1).set_target_button(target_buttons);
-
-		response_trial.present();
-		
-		process_data(this_trial, stimulus_manager.last_stimulus_data(), curr_type, j);
-
-		j = j+1;
-	end;
-
-	break_trial.present();
-	term.print_line(trial_data);
-	block_output((i*2));
-	ready_trial.present();
-i = i + 1;
-end;
-final_output();
-done_trial.present();
