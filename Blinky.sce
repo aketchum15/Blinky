@@ -14,16 +14,16 @@ $first_list = 2;
 $width_height = 540;
 
 #how long after the stimuli before the response trial shows
-$delay_before_response = 5;
+$delay_before_response = 500;
 
 #duration of the response trial
-$response_window = 1000;
+$response_window = 2000;
 
 #max duration of blank screen after response window
-$max_post_response_delay = 100;
+$max_post_response_delay = 1500;
 
 #min duration of blank screen after response window
-$min_post_response_delay = 100;
+$min_post_response_delay = 500;
 
 #number of blocks per session, should be even
 $num_blocks = 2;
@@ -976,10 +976,11 @@ trial {
 	};
 	
 	stimulus_event {
-		nothing{};
+		picture {} blank_screen;
 		deltat = $response_window;
 		port_code = 32;
 	};
+	
 } response_trial;
 
 trial {

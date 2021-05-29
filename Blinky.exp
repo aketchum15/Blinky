@@ -1,6 +1,6 @@
 <ver>22</ver>
 <efn>C:\Users\adamk\Documents\Experiments\Blinky\Blinky.exp</efn>
-<author></author>
+<author>Adam Ketchum</author>
 <con>
 <pause>P</pause>
 <pause_code></pause_code>
@@ -47,6 +47,7 @@
 <efs>
 <filename>C:\Users\adamk\Documents\Experiments\Blinky\Blinky.sce</filename>
 <filename>C:\Users\adamk\Documents\Experiments\Blinky\Blinky.exp</filename>
+<filename>C:\Users\adamk\Documents\Experiments\Blinky\Blinky.pcl</filename>
 </efs>
 <exclusive_mouse>1</exclusive_mouse>
 <exp_version></exp_version>
@@ -126,7 +127,7 @@
 <pindex>4294967295</pindex>
 </chan>
 </ip_chans>
-<lfd>C:\Users\adamk\Documents\Experiments\Blinky</lfd>
+<lfd>C:\Users\adamk\Documents\Experiments\Blinky\Log Files</lfd>
 <lnb>2</lnb>
 <lno>0</lno>
 <log>
@@ -137,7 +138,7 @@
 <meta>0</meta>
 <pien>0</pien>
 <set_def_file></set_def_file>
-<stimulus_list>0</stimulus_list>
+<stimulus_list>1</stimulus_list>
 <subject_id></subject_id>
 <subject_id_pol>0</subject_id_pol>
 <video_list>0</video_list>
@@ -154,7 +155,7 @@
 </lslset>
 <maxpv></maxpv>
 <minpv></minpv>
-<nam>Articulation</nam>
+<nam>Blinky</nam>
 <one_processor>2</one_processor>
 <oports>
 <p>
@@ -230,6 +231,11 @@
 <name>Keyboard</name>
 </device>
 <device>
+<device_type>3</device_type>
+<dx_device_type>0</dx_device_type>
+<name>Standard PS/2 Keyboard</name>
+</device>
+<device>
 <abs_axis>
 <dead_zone>0</dead_zone>
 <max>1000</max>
@@ -270,11 +276,6 @@
 <max_raw_pos>65535</max_raw_pos>
 <min_raw_pos>0</min_raw_pos>
 <name>Synaptics PrecisionTouchpad Filter Driver</name>
-</device>
-<device>
-<device_type>3</device_type>
-<dx_device_type>0</dx_device_type>
-<name>Standard PS/2 Keyboard</name>
 </device>
 <device>
 <device_type>4</device_type>

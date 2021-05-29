@@ -42,6 +42,8 @@ end;
 
 sub input_data(int index, int block, stimulus_data data) begin
 	
+	log.print("\"" + data.event_code() + "\"" + "," + type_to_string(data.type()) + "," + string(data.reaction_time_double()) + "\n");
+
 	if (data.type() == stimulus_hit) then
 		corrects[index][block] = corrects[index][block] + 1;
 	end;
@@ -57,29 +59,32 @@ sub input_data(int index, int block, stimulus_data data) begin
 	term.print_line(corrects);
 end;
 
-sub write_log begin
+sub block_output(int block) begin
 
 	log.print("Stimulus type,Percent Correct,Average Reaction\n");
 	log.print("Block Data\n");
 	double r_avg;
 	double correct;
-	
-	loop int i = 1 until i > num_blocks begin
-		log.print("\nBlock " + string(i) + "\n");
-		loop int j = 1 until j > 6 begin 
-			r_avg = 0;
-			loop int k = 1 until k > 4 begin
-				r_avg = r_avg + reaction[j][i][k];
-				k = k + 1;
-			end;
-			r_avg = r_avg / 4;
-			log.print(stim_types[j] + "," + string(double(corrects[j][i])/4) + "," + string(r_avg) + "\n");
+
+	log.print("\nBlock " + string(block) + "\n");
+	loop int i = 1 until i > 6 begin
+		r_avg = 0;
+		loop int j = 1 until j > 4 begin
+			r_avg = r_avg + reaction[i][block][j];
 			j = j + 1;
 		end;
+		r_avg = r_avg/4;
+		log.print(stim_types[i] + "," + string(double(corrects[i][block])/4) + "," + string(r_avg) + "\n");
 		i = i + 1;
 	end;
-	
+end;
+
+sub final_output begin
+
 	log.print("\nTotals\n");
+	
+	double correct; 
+	double r_avg;
 	
 	loop int i = 1 until i > 6 begin
 		correct = 0;
@@ -206,6 +211,7 @@ end;
 
 fill_array(first_list);
 
+blank_screen.set_background_color(255, 255, 255);
 
 loop int i = 1 until i > num_blocks/2 begin
 	
@@ -228,6 +234,9 @@ loop int i = 1 until i > num_blocks/2 begin
 
 		response_trial.get_stimulus_event(1).set_target_button(target_buttons);		
 		response_trial.present();
+
+		stimulus_data stim_data = stimulus_manager.last_stimulus_data();
+		stim_data.set_event_code(this_trial.description());
 		
 		#stim_type is used to map the different types of stimuli (color, motion, etc) to sequential values (1, 2, etc) using the port code
 		stim_type = (int(port_codes[1] / 100)*3 + int(port_codes[1] / 10) % 10) - 3;
@@ -235,6 +244,8 @@ loop int i = 1 until i > num_blocks/2 begin
 
 		j = j+1;
 	end;
+
+	block_output(i);
 	
 	break_trial.present();
 	ready_trial.present();
@@ -256,11 +267,16 @@ loop int i = 1 until i > num_blocks/2 begin
 		response_trial.get_stimulus_event(1).set_target_button(target_buttons);
 		response_trial.present();
 		
+		stimulus_data stim_data = stimulus_manager.last_stimulus_data();
+		stim_data.set_event_code(this_trial.description());
+
 		stim_type = (int(port_codes[1] / 100)*3 + int(port_codes[1] / 10) % 10) - 3;
-		input_data(stim_type, i*2, stimulus_manager.last_stimulus_data());
+		input_data(stim_type, i*2, stim_data);
 
 		j = j+1;
 	end;
+
+	block_output(i*2);
 
 	if (i != num_blocks/2) then
 		break_trial.present();
@@ -268,5 +284,5 @@ loop int i = 1 until i > num_blocks/2 begin
 	end;
 	i = i + 1;
 end;
-write_log();
+final_output();
 done_trial.present();
