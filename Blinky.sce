@@ -976,7 +976,7 @@ trial {
 	};
 	
 	stimulus_event {
-		picture {} blank_screen;
+		nothing {};
 		deltat = $response_window;
 		port_code = 32;
 	};

@@ -20,10 +20,12 @@ array<int> target_buttons[1];
 
 output_file log = new output_file;
 log.open("Blinky_log_" + date_time( "yyyy.mm.dd_hh.nn.ss" )+ ".csv");
+log.print("Trial Type,Response Type,Reaction Time\n");
 
 int stim_type;
-array<int> corrects[6][num_blocks];
-array<double> reaction[6][num_blocks][4];
+array<bool> c_trials[num_blocks][num_trials];
+array<double> reactions[num_blocks][num_trials];
+array<string> types[num_blocks][num_trials];
 
 array<string> stim_types[6] = {"Color", "Shape", "Motion", "Shape and Motion", "Color and Motion", "Color and Shape"};
 
@@ -40,69 +42,102 @@ sub string type_to_string(int aType) begin
 return "";
 end;
 
-sub input_data(int index, int block, stimulus_data data) begin
+sub input_data(int trial, int block, int s_type, stimulus_data data) begin
 	
 	log.print("\"" + data.event_code() + "\"" + "," + type_to_string(data.type()) + "," + string(data.reaction_time_double()) + "\n");
 
-	if (data.type() == stimulus_hit) then
-		corrects[index][block] = corrects[index][block] + 1;
-	end;
-	
-	loop int i = 1 until i > 6 begin
-		if (reaction[index][block][i] == 0.0) then
-			reaction[index][block][i] = data.reaction_time_double();
-			break;
-		end;
-		i = i + 1;
-	end;
-	term.print_line(reaction);
-	term.print_line(corrects);
+	c_trials[block][trial] = (data.type() == data.HIT);
+	reactions[block][trial] = data.reaction_time_double();
+	types[block][trial] = stim_types[s_type];
+
 end;
 
 sub block_output(int block) begin
 
-	log.print("Stimulus type,Percent Correct,Average Reaction\n");
-	log.print("Block Data\n");
-	double r_avg;
+	log.print("\nBlock Data\n");
+	log.print("Stimulus type,Percent Correct,Correct Average Reaction,Incorrect Average Reaction\n");
+	double c_avg;
+	double i_avg;
 	double correct;
 
 	log.print("\nBlock " + string(block) + "\n");
+
 	loop int i = 1 until i > 6 begin
-		r_avg = 0;
-		loop int j = 1 until j > 4 begin
-			r_avg = r_avg + reaction[i][block][j];
+		c_avg = 0;
+		i_avg = 0;
+		correct = 0;
+
+		loop int j = 1 until j > num_trials begin
+			if (types[block][j] == stim_types[i]) then
+				if (c_trials[block][j]) then
+					correct = correct + 1;
+					c_avg = c_avg + reactions[block][j];
+				else
+					i_avg = i_avg + reactions[block][j];
+				end;
+			end;
 			j = j + 1;
 		end;
-		r_avg = r_avg/4;
-		log.print(stim_types[i] + "," + string(double(corrects[i][block])/4) + "," + string(r_avg) + "\n");
+		c_avg = c_avg / correct;
+		if (correct != 4) then 
+			i_avg = i_avg / (4 - correct);
+		end;
+		
+		correct = correct / 4;
+
+		log.print(stim_types[i] + "," + string(correct) + "," + string(c_avg) + "," + string(i_avg) + "\n");
 		i = i + 1;
 	end;
+
 end;
 
 sub final_output begin
 
 	log.print("\nTotals\n");
+	log.print("Stimulus type,Percent Correct,Correct Average Reaction,Incorrect Average Reaction\n");
 	
-	double correct; 
-	double r_avg;
-	
+	double correct;
+	double c_avg;
+	double i_avg;
+
 	loop int i = 1 until i > 6 begin
+
 		correct = 0;
-		r_avg = 0;
-		loop int j = 1 until j > num_blocks begin
-			correct = correct + corrects[i][j];
-			loop int k = 1 until k > 4 begin
-				r_avg = r_avg + reaction[i][j][k];
+		c_avg = 0;
+		i_avg = 0;
+
+		loop int j = 1 until j > num_blocks begin 
+			
+			loop int k = 1 until k > num_trials begin 
+				
+				if (types[j][k] == stim_types[i]) then 
+
+					if (c_trials[j][k]) then
+
+						correct = correct + 1;
+						c_avg = c_avg + reactions[j][k];
+					else
+
+						i_avg = i_avg + reactions[j][k];
+					end;
+				end;
 				k = k + 1;
 			end;
 			j = j + 1;
 		end;
-		log.print(stim_types[i] + "," + string(correct / (4 * num_blocks)) + "," + string(r_avg / (4 * num_blocks)) + "\n");
+		
+		c_avg = c_avg / correct;
+		if (correct != 4) then 
+			i_avg = i_avg / (4 - correct);
+		end;
+		
+		correct = correct / 4;
+		
+		log.print(stim_types[i] + "," + string(correct) + "," + string(c_avg) + "," + string(i_avg) + "\n");
+
 		i = i + 1;
 	end;
-	
 end;
-
 
 sub fill_array(int first) begin 
 	if (first == 1) then
@@ -211,8 +246,6 @@ end;
 
 fill_array(first_list);
 
-blank_screen.set_background_color(255, 255, 255);
-
 loop int i = 1 until i > num_blocks/2 begin
 	
 	block1.shuffle();
@@ -240,7 +273,7 @@ loop int i = 1 until i > num_blocks/2 begin
 		
 		#stim_type is used to map the different types of stimuli (color, motion, etc) to sequential values (1, 2, etc) using the port code
 		stim_type = (int(port_codes[1] / 100)*3 + int(port_codes[1] / 10) % 10) - 3;
-		input_data(stim_type, i*2 -1, stimulus_manager.last_stimulus_data());
+		input_data(j, i*2 -1, stim_type, stim_data);
 
 		j = j+1;
 	end;
@@ -271,7 +304,7 @@ loop int i = 1 until i > num_blocks/2 begin
 		stim_data.set_event_code(this_trial.description());
 
 		stim_type = (int(port_codes[1] / 100)*3 + int(port_codes[1] / 10) % 10) - 3;
-		input_data(stim_type, i*2, stim_data);
+		input_data(j, i*2, stim_type, stim_data);
 
 		j = j+1;
 	end;
