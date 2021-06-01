@@ -164,6 +164,7 @@ sub fill_array(int first) begin
 		block1.add(BSh_PCh_235_233);
 		block1.add(bsV_bsH_136_135);
 		block1.add(BCh_PSh_237_231);
+		block1.add(bcV_bcH_138_137);
 
 		block2.add(pSH_pCV_211_214);
 		block2.add(Psv_Bsv_112_116);
