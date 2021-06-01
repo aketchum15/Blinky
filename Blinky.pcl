@@ -20,7 +20,7 @@ array<int> target_buttons[1];
 
 output_file log = new output_file;
 log.open("Blinky_log_" + date_time( "yyyy.mm.dd_hh.nn.ss" )+ ".csv");
-log.print("Trial Type,Response Type,Reaction Time\n");
+log.print("Stimulus Type,Response Type,Reaction Time\n");
 
 int stim_type;
 array<bool> c_trials[num_blocks][num_trials];
@@ -88,12 +88,12 @@ sub block_output(int block) begin
 		log.print(stim_types[i] + "," + string(correct) + "," + string(c_avg) + "," + string(i_avg) + "\n");
 		i = i + 1;
 	end;
-
+	log .print("\n");
 end;
 
 sub final_output begin
 
-	log.print("\nTotals\n");
+	log.print("Totals\n");
 	log.print("Stimulus type,Percent Correct,Correct Average Reaction,Incorrect Average Reaction\n");
 	
 	double correct;
@@ -127,11 +127,11 @@ sub final_output begin
 		end;
 		
 		c_avg = c_avg / correct;
-		if (correct != 4) then 
-			i_avg = i_avg / (4 - correct);
+		if (correct != (num_blocks * 4)) then 
+			i_avg = i_avg / ((num_blocks * 4) - correct);
 		end;
 		
-		correct = correct / 4;
+		correct = correct / (num_blocks * 4);
 		
 		log.print(stim_types[i] + "," + string(correct) + "," + string(c_avg) + "," + string(i_avg) + "\n");
 
