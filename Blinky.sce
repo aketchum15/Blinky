@@ -1,3 +1,7 @@
+#Adam Ketchum, Purdue University
+#ketchua@purdue.edu
+#October 2020
+
 scenario = "blinky";
 no_logfile = true;
 write_codes = true;
