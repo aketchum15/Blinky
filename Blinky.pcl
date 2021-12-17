@@ -56,28 +56,32 @@ end;
 sub block_output(int block) begin
 
 	log.print("\nBlock Data\n");
-	log.print("Stimulus type,Percent Correct,Correct Average Reaction,Incorrect Average Reaction\n");
+	log.print("Stimulus type,Percent Correct,Misses,Correct Average Reaction,Incorrect Average Reaction\n");
 	double c_avg;
 	double i_avg;
 	double correct;
 	double incorrect;
+	int misses;
 
 	log.print("\nBlock " + string(block) + "\n");
 
-	loop int i = 1 until i > num_blocks/2 begin
+	loop int i = 1 until i > 6 begin
 		c_avg = 0;
 		i_avg = 0;
 		correct = 0;
-        incorrect = 0;
+      incorrect = 0;
+		misses = 0;
 
 		loop int j = 1 until j > num_trials begin
 			if (types[block][j] == stim_types[i]) then
-				if (c_trials[block][j] == simulus_correct) then
+				if (c_trials[block][j] == stimulus_hit) then
 					correct = correct + 1;
 					c_avg = c_avg + reactions[block][j];
-				else if (c_trials[block][j] == stimulus_incorrect) then
-                    incorrect = incorrect + 1;
+				elseif (c_trials[block][j] == stimulus_incorrect) then
+               incorrect = incorrect + 1;
 					i_avg = i_avg + reactions[block][j];
+				else
+					misses = misses + 1;
 				end;
 			end;
 			j = j + 1;
@@ -85,13 +89,13 @@ sub block_output(int block) begin
 		if (correct != 0) then
 			c_avg = c_avg / correct;
 		end;
-		if (correct != 4) then 
-			i_avg = i_avg / (4 - correct);
+		if (incorrect != 0) then 
+			i_avg = i_avg / incorrect;
 		end;
 		
 		correct = correct / (correct + incorrect);
 
-		log.print(stim_types[i] + "," + string(correct) + "," + string(c_avg) + "," + string(i_avg) + "\n");
+		log.print(stim_types[i] + "," + string(correct) + "," + string(misses) + "," + string(c_avg) + "," + string(i_avg) + "\n");
 		i = i + 1;
 	end;
 	log .print("\n");
@@ -100,17 +104,19 @@ end;
 sub final_output begin
 
 	log.print("Totals\n");
-	log.print("Stimulus type,Percent Correct,Correct Average Reaction,Incorrect Average Reaction\n");
+	log.print("Stimulus type,Percent Correct,Misses,Correct Average Reaction,Incorrect Average Reaction\n");
 	
 	double correct;
 	double incorrect;
+	int misses;
 	double c_avg;
 	double i_avg;
 
-	loop int i = 1 until i > num_blocks/2 begin
+	loop int i = 1 until i > 6 begin
 
 		correct = 0;
 		incorrect = 0;
+		misses = 0;
 		c_avg = 0;
 		i_avg = 0;
 
@@ -121,13 +127,13 @@ sub final_output begin
 				if (types[j][k] == stim_types[i]) then 
 
 					if (c_trials[j][k] == stimulus_hit) then
-
 						correct = correct + 1;
 						c_avg = c_avg + reactions[j][k];
-					else if (c_trials[j][k] == stimulus_incorrect) then
-
-                        incorrect = incorrect + 1;
+					elseif (c_trials[j][k] == stimulus_incorrect) then
+                  incorrect = incorrect + 1;
 						i_avg = i_avg + reactions[j][k];
+					else
+						misses = misses + 1;
 					end;
 				end;
 				k = k + 1;
@@ -139,13 +145,13 @@ sub final_output begin
 			c_avg = c_avg / correct;
 		end;
 		
-		if (correct != (num_blocks * 4)) then 
-			i_avg = i_avg / ((num_blocks * 4) - correct);
+		if (incorrect != 0) then 
+			i_avg = i_avg / incorrect;
 		end;
 		
-		correct = correct / (num_blocks * (incorrect + correct));
+		correct = correct / (incorrect + correct);
 		
-		log.print(stim_types[i] + "," + string(correct) + "," + string(c_avg) + "," + string(i_avg) + "\n");
+		log.print(stim_types[i] + "," + string(correct) + "," + string(misses) + "," + string(c_avg) + "," + string(i_avg) + "\n");
 
 		i = i + 1;
 	end;
