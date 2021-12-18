@@ -64,7 +64,7 @@ sub block_output(int block) begin
 
 	log.print("\nBlock " + string(block) + "\n");
 
-	loop int i = 1 until i > 6 begin
+	loop int i = 1 until i > num_blocks/2 begin
 		c_avg = 0;
 		i_avg = 0;
 		correct = 0;
@@ -107,7 +107,7 @@ sub final_output begin
 	double c_avg;
 	double i_avg;
 
-	loop int i = 1 until i > 6 begin
+	loop int i = 1 until i > num_blocks/2 begin
 
 		correct = 0;
 		incorrect = 0;
